@@ -1,70 +1,64 @@
-import React, {useState} from 'react';
-import {FlatList, ListRenderItem, SafeAreaView, StyleSheet} from 'react-native';
+import React from 'react';
+import {ImageProps, SafeAreaView, StyleSheet} from 'react-native';
+import {Divider, Icon, Layout, Tab, TabBar, Text} from '@ui-kitten/components';
 import {
-  Button,
-  Divider,
-  Layout,
-  Tab,
-  TabBar,
-  TabBarProps,
-  Text,
-} from '@ui-kitten/components';
-import {useNavigation} from '@react-navigation/native';
+  createMaterialTopTabNavigator,
+  MaterialTopTabBarProps,
+} from '@react-navigation/material-top-tabs';
+import {RenderProp} from '@ui-kitten/components/devsupport';
+
+import {MovieList} from './MovieList';
+
+const Tabs = createMaterialTopTabNavigator();
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   titleWrapper: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   flatList: {
     flex: 1,
   },
 });
 
-const HomeHeader: React.FunctionComponent<TabBarProps> = ({...props}) => (
-  <>
+const UpcomingIcon: RenderProp<Partial<ImageProps>> = props => (
+  <Icon {...props} name="calendar-outline" />
+);
+const PopularIcon: RenderProp<Partial<ImageProps>> = props => (
+  <Icon {...props} name="trending-up-outline" />
+);
+const TopRatedIcon: RenderProp<Partial<ImageProps>> = props => (
+  <Icon {...props} name="star-outline" />
+);
+
+export const HomeHeader: React.FunctionComponent<MaterialTopTabBarProps> = ({
+  navigation,
+  state,
+}) => (
+  <SafeAreaView>
     <Layout style={styles.titleWrapper}>
       <Text category="h1">Movies</Text>
     </Layout>
     <Divider />
-    <TabBar {...props}>
-      <Tab title="UPCOMING" />
-      <Tab title="POPULAR" />
-      <Tab title="TOP RATED" />
+    <TabBar
+      selectedIndex={state.index}
+      onSelect={index => navigation.navigate(state.routeNames[index])}>
+      <Tab title="UPCOMING" icon={UpcomingIcon} />
+      <Tab title="POPULAR" icon={PopularIcon} />
+      <Tab title="TOP RATED" icon={TopRatedIcon} />
     </TabBar>
-  </>
+  </SafeAreaView>
 );
 
 export const HomeScreen: React.FunctionComponent = () => {
-  const navigation = useNavigation();
-
-  const [tabIndex, setTabIndex] = useState(0);
-
-  const navigateDetails = () => {
-    navigation.navigate('Details');
-  };
-
-  const renderItem: ListRenderItem<{}> = () => (
-    <Layout>
-      <Button onPress={navigateDetails}>OPEN DETAILS</Button>
-    </Layout>
-  );
-
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        style={styles.flatList}
-        ListHeaderComponent={
-          <HomeHeader
-            selectedIndex={tabIndex}
-            onSelect={index => setTabIndex(index)}
-          />
-        }
-        data={[{key: 0}]}
-        renderItem={renderItem}
-      />
-    </SafeAreaView>
+    <Tabs.Navigator tabBar={props => <HomeHeader {...props} />}>
+      <Tabs.Screen name="upcoming" component={MovieList} />
+      <Tabs.Screen name="popular" component={MovieList} />
+      <Tabs.Screen name="top_rated" component={MovieList} />
+    </Tabs.Navigator>
   );
 };
