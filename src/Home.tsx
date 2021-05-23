@@ -1,6 +1,6 @@
 import React from 'react';
 import {ImageProps, SafeAreaView, StyleSheet} from 'react-native';
-import {Divider, Icon, Layout, Tab, TabBar, Text} from '@ui-kitten/components';
+import {Icon, Layout, Tab, TabBar, Text} from '@ui-kitten/components';
 import {
   createMaterialTopTabNavigator,
   MaterialTopTabBarProps,
@@ -40,9 +40,10 @@ export const HomeHeader: React.FunctionComponent<MaterialTopTabBarProps> = ({
 }) => (
   <SafeAreaView>
     <Layout style={styles.titleWrapper}>
-      <Text category="h1">Movies</Text>
+      <Text category="h1" status="primary">
+        Movies
+      </Text>
     </Layout>
-    <Divider />
     <TabBar
       selectedIndex={state.index}
       onSelect={index => navigation.navigate(state.routeNames[index])}>

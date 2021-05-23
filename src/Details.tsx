@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, ImageProps, SafeAreaView, StyleSheet, View} from 'react-native';
 import {
   Avatar,
-  Card,
   Divider,
   Icon,
   Layout,
+  Spinner,
   Text,
   TopNavigation,
   TopNavigationAction,
@@ -18,11 +18,12 @@ import {
 } from '@react-navigation/native';
 import {RenderProp} from '@ui-kitten/components/devsupport';
 import {ScrollView} from 'react-native-gesture-handler';
+import {MovieCredit, MovieDetailItem, TMDBApi} from './services/tmdb';
 
 export interface MovieDetailRouteParams
   extends RouteProp<ParamListBase, string> {
-  params?: {
-    id: string;
+  params: {
+    id: number;
   };
 }
 
@@ -41,6 +42,7 @@ const styles = StyleSheet.create({
   },
   posterText: {
     alignSelf: 'center',
+    textAlign: 'center',
   },
   posterRating: {
     color: 'green',
@@ -81,20 +83,25 @@ const BackIcon: RenderProp<Partial<ImageProps>> = props => (
   <Icon {...props} name="arrow-back" />
 );
 
-const CreditItem: React.FunctionComponent = () => (
+const CreditItem: React.FunctionComponent<MovieCredit> = ({
+  name,
+  profileUrl,
+}) => (
   <View style={styles.creditItem}>
     <Avatar
       size="giant"
       source={{
-        uri: 'https://image.tmdb.org/t/p/w92//5XBzD5WuTyVQZeS4VI25z2moMeY.jpg',
+        uri: profileUrl(0).href,
       }}
     />
-    <Text style={styles.creditItemText}>What a long Name</Text>
+    <Text style={styles.creditItemText}>{name}</Text>
   </View>
 );
 
 export const DetailsScreen: React.FunctionComponent = () => {
   const navigation = useNavigation();
+  const [movie, setMovie] = useState<MovieDetailItem | undefined>(undefined);
+
   const navigateBack = () => {
     navigation.goBack();
   };
@@ -105,61 +112,63 @@ export const DetailsScreen: React.FunctionComponent = () => {
     <TopNavigationAction icon={BackIcon} onPress={navigateBack} />
   );
 
+  useEffect(() => {
+    TMDBApi.getMovieDetail(route.params.id).then(_movie => {
+      setMovie(_movie);
+    });
+  }, [route.params.id]);
+
   return (
     <SafeAreaView style={styles.container}>
       <TopNavigation accessoryLeft={BackAction} />
       <Divider />
       <Layout style={styles.container}>
-        <ScrollView>
+        {!movie ? (
           <View style={[styles.section, styles.posterSection]}>
-            <Image
-              style={styles.posterImage}
-              source={{
-                uri: 'https://image.tmdb.org/t/p/w92/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg',
-              }}
-            />
-            <Text style={styles.posterText} category="h3">
-              Movie Title
-            </Text>
-            <Text
-              style={[styles.posterText, styles.posterRating]}
-              category="h4">
-              99%
-            </Text>
+            <Spinner size="giant" />
           </View>
-          <View style={styles.section}>
-            <Text category="h5">Overview</Text>
-            <Text>Some wonderful description</Text>
-          </View>
-          <View style={styles.section}>
-            <Text category="h5">Genres</Text>
-            <View style={styles.genresSection}>
-              <View style={styles.genrePill}>
-                <Text style={styles.genrePillText}>Something's wrong</Text>
-              </View>
-              <View style={styles.genrePill}>
-                <Text style={styles.genrePillText}>Horribly</Text>
-              </View>
-              <View style={styles.genrePill}>
-                <Text style={styles.genrePillText}>Not your kind</Text>
+        ) : (
+          <ScrollView>
+            <View style={[styles.section, styles.posterSection]}>
+              <Image
+                style={styles.posterImage}
+                source={{
+                  uri: movie.posterUrl(3).href,
+                }}
+              />
+              <Text style={styles.posterText} category="h3">
+                {movie.title}
+              </Text>
+              <Text
+                style={[styles.posterText, styles.posterRating]}
+                category="h4">
+                {movie.voteAverage}
+              </Text>
+            </View>
+            <View style={styles.section}>
+              <Text category="h5">Overview</Text>
+              <Text>{movie.overview}</Text>
+            </View>
+            <View style={styles.section}>
+              <Text category="h5">Genres</Text>
+              <View style={styles.genresSection}>
+                {movie.genres.map(genre => (
+                  <View key={genre} style={styles.genrePill}>
+                    <Text style={styles.genrePillText}>{genre}</Text>
+                  </View>
+                ))}
               </View>
             </View>
-          </View>
-          <View style={styles.section}>
-            <Text category="h5">Credits</Text>
-            <ScrollView horizontal style={styles.creditScrollview}>
-              <CreditItem />
-              <CreditItem />
-              <CreditItem />
-              <CreditItem />
-              <CreditItem />
-              <CreditItem />
-              <CreditItem />
-              <CreditItem />
-              <CreditItem />
-            </ScrollView>
-          </View>
-        </ScrollView>
+            <View style={styles.section}>
+              <Text category="h5">Credits</Text>
+              <ScrollView horizontal style={styles.creditScrollview}>
+                {movie.credits.cast.map(credit => (
+                  <CreditItem key={credit.id} {...credit} />
+                ))}
+              </ScrollView>
+            </View>
+          </ScrollView>
+        )}
       </Layout>
     </SafeAreaView>
   );
