@@ -22,7 +22,6 @@
     "axios-cache-adapter": "^2.7.3",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
-    "moviedb-promise": "^3.1.8",
     "react": "17.0.1",
     "react-native": "0.64.0",
     "react-native-dotenv": "^2.5.5",
