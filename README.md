@@ -1,8 +1,8 @@
 # LesmoMovies
 
-<center>
+<p align="center">
   <img src="./screenshot.png" width="40%" />
-</center>
+</p>
 
 This is a _quickie_ displaying a bit of React Native magic. This basic implementation allows you
 to explore [The Movie Database](https://www.themoviedb.org/) using its API.
