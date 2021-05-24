@@ -1,3 +1,4 @@
+//@ts-ignore This import won't resolve, but it's digested by Babel for env-var support
 import {TMDB_API_KEY} from '@env';
 import axios from 'axios';
 import {setupCache} from 'axios-cache-adapter';
